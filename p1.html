@@ -1,1 +1,226 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Конструктор уроков Arcon</title>
+<style>
+  :root {
+    --accent: #4f4bed;
+    --accent-soft: #eceafd;
+    --bg: #faf9fc;
+    --panel: #ffffff;
+    --border: #e3e1ec;
+    --text: #1c1c1e;
+    --hint: #75758a;
+    --danger: #e5484d;
+    --danger-soft: #fceeee;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding: 24px;
+    line-height: 1.4;
+  }
+  .p1-wrap { max-width: 780px; margin: 0 auto; }
+  h1 {
+    font-size: 22px;
+    margin: 0 0 4px;
+  }
+  .p1-subtitle {
+    color: var(--hint);
+    font-size: 14px;
+    margin: 0 0 24px;
+  }
+  .p1-toolbar {
+    display: flex;
+    gap: 10px;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    padding: 12px 0;
+    z-index: 10;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+  button {
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .p1-btn-primary { background: var(--accent); color: #fff; }
+  .p1-btn-danger { background: var(--danger-soft); color: var(--danger); }
+  .p1-btn-ghost { background: var(--accent-soft); color: var(--accent); }
+  .p1-btn-small {
+    padding: 6px 10px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .p1-btn-remove {
+    background: none;
+    color: var(--danger);
+    font-size: 13px;
+    padding: 4px 8px;
+  }
 
+  section.p1-section {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 18px;
+  }
+  section.p1-section > h2 {
+    font-size: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--hint);
+    margin: 0 0 14px;
+  }
+
+  label {
+    display: block;
+    font-size: 12px;
+    color: var(--hint);
+    margin: 10px 0 4px;
+  }
+  label:first-of-type { margin-top: 0; }
+
+  input[type="text"], input[type="number"], textarea, select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    background: #fff;
+    color: var(--text);
+  }
+  textarea { resize: vertical; min-height: 54px; }
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .p1-row-inline {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .p1-row-inline input { flex: 1; }
+
+  .p1-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 12px;
+    background: #fcfcfe;
+  }
+  .p1-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .p1-card-header strong { font-size: 13px; color: var(--hint); }
+
+  .p1-example-row, .p1-pair-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+  .p1-pair-row { grid-template-columns: 1fr 1fr auto; }
+  .p1-example-row input, .p1-pair-row input { margin: 0; }
+
+  .p1-basic-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 12px;
+  }
+
+  #p1-json-output {
+    width: 100%;
+    min-height: 220px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12px;
+    white-space: pre;
+  }
+
+  .p1-output-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .p1-empty-hint {
+    color: var(--hint);
+    font-size: 13px;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+<div class="p1-wrap">
+  <h1>Конструктор уроков Arcon</h1>
+  <p class="p1-subtitle">Заполни поля — получишь готовый JSON-файл урока для <code>data/lessons/</code></p>
+
+  <div class="p1-toolbar">
+    <button id="p1-clear-btn" class="p1-btn-danger">Clear lesson</button>
+    <button id="p1-create-btn" class="p1-btn-primary">Create lesson</button>
+  </div>
+
+  <!-- Основные поля -->
+  <section class="p1-section">
+    <h2>Основное</h2>
+    <div class="p1-basic-grid">
+      <div>
+        <label for="p1-id-input">ID урока (например 3-1)</label>
+        <input type="text" id="p1-id-input" placeholder="3-1">
+      </div>
+      <div>
+        <label for="p1-xp-input">XP</label>
+        <input type="number" id="p1-xp-input" value="10">
+      </div>
+    </div>
+    <label for="p1-title-input">Название урока</label>
+    <input type="text" id="p1-title-input" placeholder="Множественное число">
+  </section>
+
+  <!-- Теория -->
+  <section class="p1-section">
+    <h2>Теория</h2>
+    <div id="p1-theory-list"></div>
+    <button id="p1-add-theory-btn" class="p1-btn-ghost p1-btn-small">+ Добавить карточку теории</button>
+  </section>
+
+  <!-- Упражнения -->
+  <section class="p1-section">
+    <h2>Упражнения</h2>
+    <div id="p1-exercises-list"></div>
+    <button id="p1-add-exercise-btn" class="p1-btn-ghost p1-btn-small">+ Добавить упражнение</button>
+  </section>
+
+  <!-- Результат -->
+  <section class="p1-section">
+    <h2>Результат</h2>
+    <p class="p1-empty-hint" id="p1-output-hint">Нажми «Create lesson», чтобы собрать JSON.</p>
+    <textarea id="p1-json-output" readonly placeholder="Здесь появится готовый JSON..."></textarea>
+    <div class="p1-output-actions">
+      <button id="p1-copy-btn" class="p1-btn-ghost p1-btn-small">Скопировать</button>
+    </div>
+  </section>
+</div>
+
+<script src = "script.js"></script>
+</body>
+</html>
