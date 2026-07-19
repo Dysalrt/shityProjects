@@ -1,5 +1,5 @@
 //P0
-let p0ColorInput = document.getElementById("p0-color-input");
+/*let p0ColorInput = document.getElementById("p0-color-input");
 let p0hexCodeOutput = document.getElementById("p0-hex-code");
 let p0rgbCodeOutput = document.getElementById("p0-rgb-code");
 func returnNum(string){
@@ -24,8 +24,7 @@ document.getElementById("p0-submit").onclick = () => {
   let b = returnNum(p0ColorInput.value.slice(3, 5);
   let g = returnNum(p0ColorInput.value.slice(5, 7));
   p0rgbCodeOutput.innerHTML = toString(r) + toString(b) + toString(g);//I knowi could've simplify this but remember, this is a shitty project, no one gives a 
-}
-
+}*/
 //P1
 (function () {
   // ---------- Шаблоны для теории ----------
