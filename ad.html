@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Мобильный помощник</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #121212;
+            color: aliceblue;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            padding: 16px;
+            background-color: #1e1e1e;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            border-bottom: 1px solid #2c2c2c;
+        }
+
+        .app-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 16px;
+            padding-bottom: 80px;
+        }
+
+        .screen {
+            display: none;
+        }
+        .screen.active {
+            display: block;
+        }
+
+        nav.bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 65px;
+            background-color: #1e1e1e;
+            border-top: 1px solid #2c2c2c;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            transition: color 0.2s;
+        }
+
+        .nav-item.active {
+            color: #0080ff;
+        }
+
+        .card {
+            background-color: rgba(60, 60, 60, 0.4);
+            border: 1px solid rgb(60, 60, 60);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .card h3 {
+            font-size: 16px;
+            margin-bottom: 6px;
+            color: #fff;
+        }
+
+        .card p {
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #0080ff;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn:active {
+            background-color: #0066cc;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            color: #aaa;
+            margin-bottom: 4px;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 10px;
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .calorie-status {
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .status-normal { background-color: rgba(39, 174, 96, 0.3); color: #2ecc71; border: 1px solid #2ecc71; }
+        .status-warning { background-color: rgba(241, 196, 15, 0.3); color: #f1c40f; border: 1px solid #f1c40f; }
+        .status-danger { background-color: rgba(231, 76, 60, 0.3); color: #e74c3c; border: 1px solid #e74c3c; }
+
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .hidden { display: none !important; }
+        .modal-content {
+            background-color: #222;
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 320px;
+            border: 1px solid #444;
+        }
+
+        canvas {
+            width: 100%;
+            height: 150px;
+            background-color: #222;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <header id="header-title">Заметки</header>
+
+    <div class="app-container">
+        
+        <!-- ЭКРАН 1: ЗАМЕТКИ -->
+        <section id="screen-notes" class="screen active">
+            <button class="btn" onclick="openModal('note-modal')">+ Новая заметка</button>
+            <div id="notes-list" style="margin-top: 15px;"></div>
+        </section>
+
+        <!-- ЭКРАН 2: СОН -->
+        <section id="screen-sleep" class="screen">
+            <div class="card">
+                <h3>Записать сон</h3>
+                <div class="input-group">
+                    <label>Лёг спать:</label>
+                    <input type="time" step="1" id="sleep-start" value="23:00:00">
+                </div>
+                <div class="input-group">
+                    <label>Встал:</label>
+                    <input type="time" step="1" id="sleep-end" value="07:00:00">
+                </div>
+                <button class="btn" onclick="saveSleep()">Сохранить сон</button>
+            </div>
+            
+            <div class="card">
+                <h3>График колебаний сна (часы)</h3>
+                <canvas id="sleep-chart"></canvas>
+            </div>
+
+            <div class="card">
+                <h3>История сна</h3>
+                <div id="sleep-history"><p style="color: #777;">Нет записей</p></div>
+            </div>
+        </section>
+
+        <!-- ЭКРАН 3: КАЛОРИИ -->
+        <section id="screen-calories" class="screen">
+            <div class="card">
+                <h3>Ваши параметры</h3>
+                <div style="display: flex; gap: 10px;">
+                    <div class="input-group" style="flex:1;"><label>Вес (кг)</label><input type="number" id="cal-weight" value="70" onchange="saveProfile()"></div>
+                    <div class="input-group" style="flex:1;"><label>Рост (см)</label><input type="number" id="cal-height" value="175" onchange="saveProfile()"></div>
+                    <div class="input-group" style="flex:1;"><label>Возраст</label><input type="number" id="cal-age" value="25" onchange="saveProfile()"></div>
+                </div>
+            </div>
+
+            <div id="calorie-status-box" class="calorie-status status-normal">Норма: подсчет...</div>
+
+            <div class="card">
+                <h3>Баланс дня</h3>
+                <p>Съедено: <b id="eaten-calories">0</b> ккал</p>
+                <p>Потрачено: <b id="burned-calories">0</b> ккал</p>
+                <button class="btn" onclick="openModal('cal-add-modal')" style="background-color: #27ae60;">+ Добавить прием / расход</button>
+                <button class="btn" onclick="resetDay()" style="background-color: #c0392b; margin-top: 8px;">Сбросить день</button>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Модальное окно: Заметка -->
+    <div id="note-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Новая заметка</h3>
+            <div class="input-group" style="margin-top:10px;"><label>Дата:</label><input type="date" id="n-date"></div>
+            <div class="input-group"><label>Текст:</label><input type="text" id="n-text" placeholder="О чем запись?"></div>
+            <button class="btn" onclick="addNote()">Добавить</button>
+            <button class="btn" onclick="closeModal('note-modal')" style="background-color:#444; margin-top:6px;">Отмена</button>
+        </div>
+    </div>
+
+    <!-- Модальное окно: Калории -->
+    <div id="cal-add-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Добавить калории</h3>
+            <div class="input-group" style="margin-top:10px;">
+                <label>Тип:</label>
+                <select id="cal-type"><option value="eat">Съел (+)</option><option value="burn">Потратил (-)</option></select>
+            </div>
+            <div class="input-group"><label>Количество (ккал):</label><input type="number" id="cal-amount" placeholder="Например: 450"></div>
+            <button class="btn" onclick="addCaloriesData()">ОК</button>
+            <button class="btn" onclick="closeModal('cal-add-modal')" style="background-color:#444; margin-top:6px;">Отмена</button>
+        </div>
+    </div>
+
+    <!-- Нижняя навигация -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" onclick="switchScreen('notes', this)">
+            <span>📝</span> Заметки
+        </button>
+        <button class="nav-item" onclick="switchScreen('sleep', this)">
+            <span>🌙</span> Сон
+        </button>
+        <button class="nav-item" onclick="switchScreen('calories', this)">
+            <span>🔥</span> Калории
+        </button>
+    </nav>
+
+    <script>
+        function switchScreen(screenName, btnElement) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            document.getElementById('screen-' + screenName).classList.add('active');
+            btnElement.classList.add('active');
+
+            const titles = { notes: 'Заметки', sleep: 'Трекер сна', calories: 'Калории' };
+            document.getElementById('header-title').innerText = titles[screenName];
+            
+            if(screenName === 'sleep') drawSleepChart();
+        }
+
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        // --- ПАМЯТЬ И ЗАГРУЗКА ДАННЫХ ПРИ СТАРТЕ ---
+        let notes = JSON.parse(localStorage.getItem('app_notes')) || [];
+        let sleepLogs = JSON.parse(localStorage.getItem('app_sleep')) || [];
+        let totalEaten = Number(localStorage.getItem('app_eaten')) || 0;
+        let totalBurned = Number(localStorage.getItem('app_burned')) || 0;
+        let targetCalories = 2000;
+
+        // Загружаем профиль, если он сохранен
+        if(localStorage.getItem('app_weight')) document.getElementById('cal-weight').value = localStorage.getItem('app_weight');
+        if(localStorage.getItem('app_height')) document.getElementById('cal-height').value = localStorage.getItem('app_height');
+        if(localStorage.getItem('app_age')) document.getElementById('cal-age').value = localStorage.getItem('app_age');
+
+        // ЗАМЕТКИ
+        function addNote() {
+            const date = document.getElementById('n-date').value;
+            const text = document.getElementById('n-text').value;
+            if(!date || !text) return alert('Заполните поля');
+            
+            notes.push({ date, text });
+            localStorage.setItem('app_notes', JSON.stringify(notes)); // Сохраняем в память
+            
+            renderNotes();
+            closeModal('note-modal');
+            document.getElementById('n-text').value = '';
+        }
+        function renderNotes() {
+            const list = document.getElementById('notes-list');
+            list.innerHTML = notes.map(n => `
+                <div class="card">
+                    <h3>${n.date}</h3>
+                    <p>${n.text}</p>
+                </div>
+            `).join('') || '<p style="color:#777;">Нет заметок</p>';
+        }
+
+        // СОН
+        function saveSleep() {
+            const start = document.getElementById('sleep-start').value;
+            const end = document.getElementById('sleep-end').value;
+            if(!start || !end) return alert('Укажите время');
+
+            let parts1 = start.split(':').map(Number);
+            let parts2 = end.split(':').map(Number);
+
+            let totalSec1 = (parts1[0] || 0) * 3600 + (parts1[1] || 0) * 60 + (parts1[2] || 0);
+            let totalSec2 = (parts2[0] || 0) * 3600 + (parts2[1] || 0) * 60 + (parts2[2] || 0);
+
+            let diffSec = totalSec2 - totalSec1;
+            if(diffSec < 0) diffSec += 24 * 3600;
+
+            let hoursVal = Number((diffSec / 3600).toFixed(1));
+
+            sleepLogs.push({ 
+                start, 
+                end, 
+                hoursVal,
+                durationStr: `${Math.floor(diffSec / 3600)} ч. ${Math.floor((diffSec % 3600) / 60)} мин.` 
+            });
+
+            localStorage.setItem('app_sleep', JSON.stringify(sleepLogs)); // Сохраняем в память
+
+            renderSleep();
+            drawSleepChart();
+        }
+
+        function renderSleep() {
+            document.getElementById('sleep-history').innerHTML = sleepLogs.slice().reverse().map(s => `
+                <div style="background:#2a2a2a; padding:10px; border-radius:6px; margin-top:6px; font-size:14px;">
+                    😴 ${s.start} — ${s.end} <br><b style="color:#2ecc71;">Длительность: ${s.durationStr}</b>
+                </div>
+            `).join('');
+        }
+
+        function drawSleepChart() {
+            const canvas = document.getElementById('sleep-chart');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.parentElement.clientWidth - 32;
+            canvas.height = 150;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (sleepLogs.length === 0) {
+                ctx.fillStyle = '#777';
+                ctx.font = '14px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('Нет данных для графика', canvas.width / 2, canvas.height / 2);
+                return;
+            }
+
+            const padding = 30;
+            const width = canvas.width - padding * 2;
+            const height = canvas.height - padding * 2;
+
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, canvas.height - padding);
+            ctx.lineTo(canvas.width - padding, canvas.height - padding);
+            ctx.stroke();
+
+            let maxHours = Math.max(...sleepLogs.map(s => s.hoursVal), 12);
+            const dx = width / Math.max(sleepLogs.length - 1, 1);
+
+            ctx.strokeStyle = '#0080ff';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+
+            sleepLogs.forEach((log, index) => {
+                const x = padding + index * dx;
+                const y = canvas.height - padding - (log.hoursVal / maxHours) * height;
+
+                if (index === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+
+                ctx.fillStyle = '#2ecc71';
+                ctx.fillRect(x - 3, y - 3, 6, 6);
+            });
+            ctx.stroke();
+        }
+
+        // КАЛОРИИ
+        function saveProfile() {
+            localStorage.setItem('app_weight', document.getElementById('cal-weight').value);
+            localStorage.setItem('app_height', document.getElementById('cal-height').value);
+            localStorage.setItem('app_age', document.getElementById('cal-age').value);
+            updateCaloriesNorm();
+        }
+
+        function updateCaloriesNorm() {
+            const weight = Number(document.getElementById('cal-weight').value);
+            const height = Number(document.getElementById('cal-height').value);
+            const age = Number(document.getElementById('cal-age').value);
+            targetCalories = Math.round((10 * weight + 6.25 * height - 5 * age + 5) * 1.2);
+            updateCalorieStatus();
+        }
+
+        function addCaloriesData() {
+            const type = document.getElementById('cal-type').value;
+            const amount = Number(document.getElementById('cal-amount').value);
+            if(!amount) return;
+
+            if(type === 'eat') totalEaten += amount;
+            else totalBurned += amount;
+
+            // Сохраняем баланс калорий в память
+            localStorage.setItem('app_eaten', totalEaten);
+            localStorage.setItem('app_burned', totalBurned);
+
+            document.getElementById('eaten-calories').innerText = totalEaten;
+            document.getElementById('burned-calories').innerText = totalBurned;
+            updateCalorieStatus();
+            closeModal('cal-add-modal');
+            document.getElementById('cal-amount').value = '';
+        }
+
+        function updateCalorieStatus() {
+            const box = document.getElementById('calorie-status-box');
+            const net = totalEaten - totalBurned;
+
+            box.className = "calorie-status";
+            if (net < targetCalories - 300) {
+                box.classList.add('status-warning');
+                box.innerText = `Недобор! Съедено ${net} из ~${targetCalories} ккал`;
+            } else if (net > targetCalories + 300) {
+                box.classList.add('status-danger');
+                box.innerText = `Внимание: перебор! Превышение нормы`;
+            } else {
+                box.classList.add('status-normal');
+                box.innerText = `Идеально! Вы в целевом коридоре`;
+            }
+        }
+
+        function resetDay() {
+            totalEaten = 0;
+            totalBurned = 0;
+            localStorage.setItem('app_eaten', 0);
+            localStorage.setItem('app_burned', 0);
+            document.getElementById('eaten-calories').innerText = 0;
+            document.getElementById('burned-calories').innerText = 0;
+            updateCalorieStatus();
+        }
+
+        // Первичный запуск при загрузке страницы
+        updateCaloriesNorm();
+        renderNotes();
+        renderSleep();
+        document.getElementById('eaten-calories').innerText = totalEaten;
+        document.getElementById('burned-calories').innerText = totalBurned;
+    </script>
+</body>
+</html>
