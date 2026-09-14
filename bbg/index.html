@@ -16,10 +16,11 @@
     <nav id="menu">
         <button class="menu-btn" onclick="showScreen('memory-setup-screen')">1. Memory Matrix</button>
         <button class="menu-btn" onclick="showScreen('math-game-screen')">2. Speed Math</button>
+        <button class="menu-btn" onclick="showScreen('reaction-setup-screen')">3. Reaction & Accuracy</button>
+        <button class="menu-btn" onclick="showScreen('tracker-setup-screen')">4. Observer (Tracker)</button>
     </nav>
 
     <!-- GAME 1: MEMORY MATRIX -->
-    <!-- Setup Screen -->
     <div id="memory-setup-screen" class="screen hidden">
         <h2>Memory Matrix</h2>
         <div class="input-group">
@@ -34,7 +35,6 @@
         <button class="btn secondary" onclick="showMenu()">Back to Menu</button>
     </div>
 
-    <!-- Play Screen -->
     <div id="memory-game-screen" class="screen hidden">
         <h2 id="memory-status">Memorize the pattern!</h2>
         <div id="timer-display" class="timer hidden">Wait... <span id="countdown">0</span>s</div>
@@ -53,7 +53,6 @@
         <div id="math-equation" class="equation">? + ?</div>
         <div id="math-input" class="math-display-input">_</div>
         
-        <!-- Virtual Numpad -->
         <div class="numpad">
             <button onclick="appendMathInput('1')">1</button>
             <button onclick="appendMathInput('2')">2</button>
@@ -71,6 +70,63 @@
         
         <button id="math-start-btn" class="btn" onclick="toggleMathGame()">Start Game</button>
         <button class="btn secondary" onclick="showMenu()">Back to Menu</button>
+    </div>
+
+    <!-- GAME 3: REACTION & ACCURACY -->
+    <div id="reaction-setup-screen" class="screen hidden">
+        <h2>Reaction & Accuracy</h2>
+        <div class="input-group">
+            <label for="react-grid-size">Grid Size (X):</label>
+            <input type="number" id="react-grid-size" value="4" min="2" max="10">
+        </div>
+        <div class="input-group">
+            <label for="react-difficulty">Difficulty:</label>
+            <select id="react-difficulty">
+                <option value="easy">Easy (Only Red)</option>
+                <option value="medium">Medium (+ Decoy Green)</option>
+                <option value="hardcore">Hardcore (+ Penalty Purple)</option>
+            </select>
+        </div>
+        <button class="btn" onclick="startReactionGame()">Start Game</button>
+        <button class="btn secondary" onclick="showMenu()">Back to Menu</button>
+    </div>
+
+    <div id="reaction-game-screen" class="screen hidden">
+        <div class="math-stats">
+            <div>Score: <span id="react-score">0</span></div>
+            <div>Penalty: <span id="react-penalty">0</span></div>
+        </div>
+        <div id="reaction-grid" class="grid"></div>
+        <button class="btn secondary" onclick="stopReactionGame(); showMenu();">Quit Game</button>
+    </div>
+
+    <!-- GAME 4: OBSERVER (TRACKER) -->
+    <div id="tracker-setup-screen" class="screen hidden">
+        <h2>Observer</h2>
+        <div class="input-group">
+            <label for="track-speed">Arrow Fade Out Time (sec):</label>
+            <input type="number" id="track-speed" value="1" min="0.3" max="3" step="0.1">
+        </div>
+        <div class="input-group">
+            <label for="track-moves">Number of Moves:</label>
+            <input type="number" id="track-moves" value="5" min="1" max="30">
+        </div>
+        <div class="input-group">
+            <label for="track-mode">Mode:</label>
+            <select id="track-mode">
+                <option value="normal">Normal (Red arrows)</option>
+                <option value="hardcore">Hardcore (Decoy colors)</option>
+            </select>
+        </div>
+        <button class="btn" onclick="startTrackerGame()">Start Game</button>
+        <button class="btn secondary" onclick="showMenu()">Back to Menu</button>
+    </div>
+
+    <div id="tracker-game-screen" class="screen hidden">
+        <h2 id="tracker-status">Memorize starting position!</h2>
+        <div id="tracker-grid" class="grid grid-10"></div>
+        <button id="tracker-btn" class="btn" onclick="handleTrackerAction()">Ready</button>
+        <button class="btn secondary" onclick="stopTrackerGame(); showMenu();">Quit</button>
     </div>
 
     <script src="script.js"></script>
