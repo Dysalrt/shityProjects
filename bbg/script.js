@@ -254,6 +254,8 @@ let reactDifficulty = 'easy';
 let reactScore = 0;
 let reactPenalty = 0;
 let reactTimeoutId = null;
+let reactStopwatchInterval = null;
+let reactTime = 0;
 let activeRedCell = null;
 let isReactRunning = false;
 
@@ -263,10 +265,12 @@ function startReactionGame() {
     
     reactScore = 0;
     reactPenalty = 0;
+    reactTime = 0;
     isReactRunning = true;
 
     document.getElementById('react-score').innerText = reactScore;
     document.getElementById('react-penalty').innerText = reactPenalty;
+    document.getElementById('react-stopwatch').innerText = '0.0';
 
     const gridContainer = document.getElementById('reaction-grid');
     gridContainer.style.gridTemplateColumns = `repeat(${reactGridSize}, 1fr)`;
@@ -281,18 +285,26 @@ function startReactionGame() {
     }
 
     showScreen('reaction-game-screen');
+
+    // Start Stopwatch
+    clearInterval(reactStopwatchInterval);
+    reactStopwatchInterval = setInterval(() => {
+        reactTime += 0.1;
+        document.getElementById('react-stopwatch').innerText = reactTime.toFixed(1);
+    }, 100);
+
     scheduleNextRedBlock();
 }
 
 function stopReactionGame() {
     isReactRunning = false;
     clearTimeout(reactTimeoutId);
+    clearInterval(reactStopwatchInterval);
 }
 
 function scheduleNextRedBlock() {
     if (!isReactRunning) return;
     
-    // Random delay between 0 and 7 seconds
     let delay = Math.random() * 7000;
     
     reactTimeoutId = setTimeout(() => {
@@ -306,14 +318,13 @@ function spawnRedBlock() {
     const cells = document.querySelectorAll('#reaction-grid .cell');
     let randomIndex = Math.floor(Math.random() * cells.length);
     activeRedCell = cells[randomIndex];
-    activeRedCell.style.backgroundColor = '#e74c3c'; // Red
+    activeRedCell.style.backgroundColor = '#e74c3c';
 
-    // Optional Decoy blocks based on difficulty
     if (reactDifficulty === 'medium' || reactDifficulty === 'hardcore') {
-        spawnDecoyBlock('#2ecc71', 5000); // Green (disappears in 5s)
+        spawnDecoyBlock('#2ecc71', 5000);
     }
     if (reactDifficulty === 'hardcore') {
-        spawnDecoyBlock('#9b59b6', 4000); // Purple penalty block
+        spawnDecoyBlock('#9b59b6', 4000);
     }
 }
 
@@ -338,7 +349,6 @@ function handleReactClick(cell) {
 
     let color = cell.style.backgroundColor;
 
-    // Clicked Red Target
     if (cell === activeRedCell && (color === 'rgb(231, 76, 60)' || color === '#e74c3c')) {
         reactScore++;
         document.getElementById('react-score').innerText = reactScore;
@@ -346,7 +356,6 @@ function handleReactClick(cell) {
         activeRedCell = null;
         scheduleNextRedBlock();
     }
-    // Clicked Penalty Purple Block
     else if (color === 'rgb(155, 89, 182)' || color === '#9b59b6') {
         reactPenalty++;
         document.getElementById('react-penalty').innerText = reactPenalty;
@@ -362,7 +371,7 @@ let trackerCurrentPos = { r: 0, c: 0 };
 let trackerMoveCount = 5;
 let trackerSpeed = 1;
 let trackerMode = 'normal';
-let trackerStep = 'setup'; // 'setup', 'moving', 'guess'
+let trackerStep = 'setup';
 
 const DIRECTIONS = [
     { r: -1, c: 0, arrow: '↑' },
@@ -386,12 +395,14 @@ function startTrackerGame() {
     for (let r = 0; r < 10; r++) {
         for (let c = 0; c < 10; c++) {
             let cell = document.createElement('div');
-            cell.className = 'cell arrow-cell';
+            cell.className = 'cell';
             cell.dataset.r = r;
             cell.dataset.c = c;
             grid.appendChild(cell);
         }
     }
+
+    document.getElementById('arrow-display-box').innerText = '';
 
     // Set Random Initial Red Square
     trackerPos.r = Math.floor(Math.random() * 10);
@@ -434,10 +445,11 @@ async function startArrowSequence() {
     let startCell = getTrackerCell(trackerPos.r, trackerPos.c);
     startCell.style.backgroundColor = '#222';
 
+    const arrowBox = document.getElementById('arrow-display-box');
+
     for (let i = 0; i < trackerMoveCount; i++) {
         if (trackerStep !== 'moving') return;
 
-        // Find valid moves inside 10x10 bounds
         let validMoves = DIRECTIONS.filter(d => {
             let nr = trackerCurrentPos.r + d.r;
             let nc = trackerCurrentPos.c + d.c;
@@ -445,30 +457,27 @@ async function startArrowSequence() {
         });
 
         let move = validMoves[Math.floor(Math.random() * validMoves.length)];
-        let targetCell = getTrackerCell(trackerCurrentPos.r, trackerCurrentPos.c);
 
-        // Update actual internal position
         trackerCurrentPos.r += move.r;
         trackerCurrentPos.c += move.c;
 
-        // Arrow display setup
-        targetCell.innerText = move.arrow;
-        targetCell.style.color = (trackerMode === 'hardcore' && Math.random() > 0.4) 
+        // Show arrow inside separate box
+        arrowBox.innerText = move.arrow;
+        arrowBox.style.color = (trackerMode === 'hardcore' && Math.random() > 0.4) 
             ? DECOY_COLORS[Math.floor(Math.random() * DECOY_COLORS.length)] 
             : '#e74c3c';
 
-        // Fade Out effect
-        targetCell.style.transition = `opacity ${trackerSpeed}s ease`;
-        
-        await new Promise(res => setTimeout(res, 100)); // slight pause before fade
-        targetCell.classList.add('fade-out');
+        arrowBox.style.transition = `opacity ${trackerSpeed}s ease`;
+        arrowBox.classList.remove('fade-out');
+
+        await new Promise(res => setTimeout(res, 100));
+        arrowBox.classList.add('fade-out');
 
         await new Promise(res => setTimeout(res, trackerSpeed * 1000));
         
-        // Cleanup cell state
-        targetCell.innerText = '';
-        targetCell.classList.remove('fade-out');
-        targetCell.style.transition = 'none';
+        arrowBox.innerText = '';
+        arrowBox.classList.remove('fade-out');
+        arrowBox.style.transition = 'none';
     }
 
     enableGuessingPhase();
@@ -489,11 +498,11 @@ function enableGuessingPhase() {
             let actualTargetCell = getTrackerCell(trackerCurrentPos.r, trackerCurrentPos.c);
 
             if (r === trackerCurrentPos.r && c === trackerCurrentPos.c) {
-                cell.style.backgroundColor = '#2ecc71'; // Correct Green
+                cell.style.backgroundColor = '#2ecc71';
                 document.getElementById('tracker-status').innerText = 'Correct! Excellent tracking!';
             } else {
-                cell.style.backgroundColor = '#e74c3c'; // Wrong Red
-                actualTargetCell.style.backgroundColor = '#2ecc71'; // Highlight actual position
+                cell.style.backgroundColor = '#e74c3c';
+                actualTargetCell.style.backgroundColor = '#2ecc71';
                 document.getElementById('tracker-status').innerText = 'Wrong! Green shows actual position.';
             }
 
@@ -503,5 +512,4 @@ function enableGuessingPhase() {
             btn.innerText = 'Play Again';
         };
     });
-            }
-            
+}
