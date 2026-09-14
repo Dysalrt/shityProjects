@@ -1,139 +1,211 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brain Booster Games</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    user-select: none;
+}
 
-    <header>
-        <h1>Brain Booster</h1>
-    </header>
+body {
+    background-color: #121212;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
 
-    <!-- Main Navigation Menu -->
-    <nav id="menu">
-        <button class="menu-btn" onclick="showScreen('memory-setup-screen')">1. Memory Matrix</button>
-        <button class="menu-btn" onclick="showScreen('math-game-screen')">2. Speed Math</button>
-        <button class="menu-btn" onclick="showScreen('reaction-setup-screen')">3. Reaction & Accuracy</button>
-        <button class="menu-btn" onclick="showScreen('tracker-setup-screen')">4. Observer (Tracker)</button>
-    </nav>
+header h1 {
+    margin-bottom: 20px;
+    color: #4CAF50;
+}
 
-    <!-- GAME 1: MEMORY MATRIX -->
-    <div id="memory-setup-screen" class="screen hidden">
-        <h2>Memory Matrix</h2>
-        <div class="input-group">
-            <label for="grid-size">Grid Size (X):</label>
-            <input type="number" id="grid-size" value="3" min="2" max="15">
-        </div>
-        <div class="input-group">
-            <label for="wait-time">Wait Time (seconds):</label>
-            <input type="number" id="wait-time" value="3" min="1" max="60">
-        </div>
-        <button class="btn" onclick="startMemoryGame()">Start Game</button>
-        <button class="btn secondary" onclick="showMenu()">Back to Menu</button>
-    </div>
+#menu {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    max-width: 320px;
+}
 
-    <div id="memory-game-screen" class="screen hidden">
-        <h2 id="memory-status">Memorize the pattern!</h2>
-        <div id="timer-display" class="timer hidden">Wait... <span id="countdown">0</span>s</div>
-        <div id="memory-grid" class="grid"></div>
-        <button id="memory-action-btn" class="btn" onclick="handleMemoryAction()">Done</button>
-        <button class="btn secondary" onclick="showMenu()">Quit</button>
-    </div>
+.menu-btn {
+    padding: 15px;
+    font-size: 16px;
+    background-color: #1e1e1e;
+    color: white;
+    border: 2px solid #333;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+    text-align: left;
+}
 
-    <!-- GAME 2: SPEED MATH -->
-    <div id="math-game-screen" class="screen hidden">
-        <h2>Speed Math</h2>
-        <div class="math-stats">
-            <div>Time: <span id="math-timer">0.0</span>s</div>
-            <div>Score: <span id="math-score">0</span></div>
-        </div>
-        <div id="math-equation" class="equation">? + ?</div>
-        <div id="math-input" class="math-display-input">_</div>
-        
-        <div class="numpad">
-            <button onclick="appendMathInput('1')">1</button>
-            <button onclick="appendMathInput('2')">2</button>
-            <button onclick="appendMathInput('3')">3</button>
-            <button onclick="appendMathInput('4')">4</button>
-            <button onclick="appendMathInput('5')">5</button>
-            <button onclick="appendMathInput('6')">6</button>
-            <button onclick="appendMathInput('7')">7</button>
-            <button onclick="appendMathInput('8')">8</button>
-            <button onclick="appendMathInput('9')">9</button>
-            <button onclick="clearMathInput()">⌫</button>
-            <button onclick="appendMathInput('0')">0</button>
-            <button class="submit-btn" onclick="submitMathAnswer()">✓</button>
-        </div>
-        
-        <button id="math-start-btn" class="btn" onclick="toggleMathGame()">Start Game</button>
-        <button class="btn secondary" onclick="showMenu()">Back to Menu</button>
-    </div>
+.menu-btn:hover {
+    border-color: #4CAF50;
+}
 
-    <!-- GAME 3: REACTION & ACCURACY -->
-    <div id="reaction-setup-screen" class="screen hidden">
-        <h2>Reaction & Accuracy</h2>
-        <div class="input-group">
-            <label for="react-grid-size">Grid Size (X):</label>
-            <input type="number" id="react-grid-size" value="4" min="2" max="10">
-        </div>
-        <div class="input-group">
-            <label for="react-difficulty">Difficulty:</label>
-            <select id="react-difficulty">
-                <option value="easy">Easy (Only Red)</option>
-                <option value="medium">Medium (+ Decoy Green)</option>
-                <option value="hardcore">Hardcore (+ Penalty Purple)</option>
-            </select>
-        </div>
-        <button class="btn" onclick="startReactionGame()">Start Game</button>
-        <button class="btn secondary" onclick="showMenu()">Back to Menu</button>
-    </div>
+.screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 400px;
+}
 
-    <div id="reaction-game-screen" class="screen hidden">
-        <div class="math-stats">
-            <div>Time: <span id="react-stopwatch">0.0</span>s</div>
-            <div>Score: <span id="react-score">0</span></div>
-            <div>Penalty: <span id="react-penalty">0</span></div>
-        </div>
-        <div id="reaction-grid" class="grid"></div>
-        <button class="btn secondary" onclick="stopReactionGame(); showMenu();">Quit Game</button>
-    </div>
+.hidden {
+    display: none !important;
+}
 
-    <!-- GAME 4: OBSERVER (TRACKER) -->
-    <div id="tracker-setup-screen" class="screen hidden">
-        <h2>Observer</h2>
-        <div class="input-group">
-            <label for="track-speed">Arrow Fade Out Time (sec):</label>
-            <input type="number" id="track-speed" value="1" min="0.3" max="3" step="0.1">
-        </div>
-        <div class="input-group">
-            <label for="track-moves">Number of Moves:</label>
-            <input type="number" id="track-moves" value="5" min="1" max="30">
-        </div>
-        <div class="input-group">
-            <label for="track-mode">Mode:</label>
-            <select id="track-mode">
-                <option value="normal">Normal (Red arrows)</option>
-                <option value="hardcore">Hardcore (Decoy colors)</option>
-            </select>
-        </div>
-        <button class="btn" onclick="startTrackerGame()">Start Game</button>
-        <button class="btn secondary" onclick="showMenu()">Back to Menu</button>
-    </div>
+.input-group {
+    margin: 10px 0;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
 
-    <div id="tracker-game-screen" class="screen hidden">
-        <h2 id="tracker-status">Memorize starting position!</h2>
-        <div id="tracker-grid" class="grid grid-10"></div>
-        
-        <!-- Separate display box for directional arrows -->
-        <div id="arrow-display-box" class="arrow-box"></div>
+.input-group label {
+    margin-bottom: 5px;
+}
 
-        <button id="tracker-btn" class="btn" onclick="handleTrackerAction()">Ready</button>
-        <button class="btn secondary" onclick="stopTrackerGame(); showMenu();">Quit</button>
-    </div>
+.input-group input, .input-group select {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: none;
+    background: #222;
+    color: white;
+}
 
-    <script src="script.js"></script>
-</body>
-</html>
+.btn {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn.secondary {
+    background-color: #555;
+}
+
+/* Grids */
+.grid {
+    display: grid;
+    gap: 4px;
+    margin: 15px 0;
+    width: 100%;
+    max-width: 350px;
+}
+
+.grid-10 {
+    grid-template-columns: repeat(10, 1fr);
+}
+
+.cell {
+    aspect-ratio: 1;
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    background-color: #222;
+    transition: background-color 0.1s;
+}
+
+/* Feedback for Game 1 */
+.cell.correct::after {
+    content: '✓';
+    color: #ffffff;
+    font-size: 1.2rem;
+    text-shadow: 0 0 4px rgba(0,0,0,0.8);
+}
+
+.cell.wrong {
+    border: 2px solid #ff3333;
+}
+
+.cell.wrong::before {
+    content: '✕';
+    color: #ffffff;
+    font-size: 0.9rem;
+}
+
+.target-color-hint {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1px solid #ffffff;
+}
+
+/* Math Styles */
+.math-stats {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+.equation {
+    font-size: 36px;
+    font-weight: bold;
+    margin: 15px 0;
+    color: #00bcd4;
+}
+
+.math-display-input {
+    font-size: 28px;
+    min-height: 40px;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #fff;
+    width: 100px;
+    text-align: center;
+}
+
+.numpad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    width: 100%;
+    max-width: 250px;
+    margin-bottom: 15px;
+}
+
+.numpad button {
+    padding: 15px;
+    font-size: 20px;
+    background-color: #222;
+    color: white;
+    border: 1px solid #444;
+    border-radius: 6px;
+}
+
+.numpad button.submit-btn {
+    background-color: #4CAF50;
+}
+
+/* Arrow display box for Game 4 */
+.arrow-box {
+    width: 100%;
+    height: 70px;
+    margin: 10px 0;
+    background-color: #1e1e1e;
+    border: 2px dashed #444;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: bold;
+    opacity: 1;
+}
