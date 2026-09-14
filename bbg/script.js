@@ -402,7 +402,9 @@ function startTrackerGame() {
         }
     }
 
-    document.getElementById('arrow-display-box').innerText = '';
+    const arrowBox = document.getElementById('arrow-display-box');
+    arrowBox.innerText = '';
+    arrowBox.classList.remove('fade-out');
 
     // Set Random Initial Red Square
     trackerPos.r = Math.floor(Math.random() * 10);
@@ -461,25 +463,28 @@ async function startArrowSequence() {
         trackerCurrentPos.r += move.r;
         trackerCurrentPos.c += move.c;
 
-        // Show arrow inside separate box
+        // Reset state before rendering arrow
+        arrowBox.style.transition = 'none';
+        arrowBox.classList.remove('fade-out');
         arrowBox.innerText = move.arrow;
         arrowBox.style.color = (trackerMode === 'hardcore' && Math.random() > 0.4) 
             ? DECOY_COLORS[Math.floor(Math.random() * DECOY_COLORS.length)] 
             : '#e74c3c';
 
-        arrowBox.style.transition = `opacity ${trackerSpeed}s ease`;
-        arrowBox.classList.remove('fade-out');
+        // Brief delay to ensure transition applies cleanly
+        await new Promise(res => setTimeout(res, 50));
 
-        await new Promise(res => setTimeout(res, 100));
+        // Start fading out according to configured speed
+        let fadeDuration = trackerSpeed * 0.8; 
+        arrowBox.style.transition = `opacity ${fadeDuration}s ease-in-out`;
         arrowBox.classList.add('fade-out');
 
+        // Wait for configured step duration before displaying next arrow
         await new Promise(res => setTimeout(res, trackerSpeed * 1000));
-        
-        arrowBox.innerText = '';
-        arrowBox.classList.remove('fade-out');
-        arrowBox.style.transition = 'none';
     }
 
+    arrowBox.innerText = '';
+    arrowBox.classList.remove('fade-out');
     enableGuessingPhase();
 }
 
@@ -512,5 +517,4 @@ function enableGuessingPhase() {
             btn.innerText = 'Play Again';
         };
     });
-}
-    
+            }
