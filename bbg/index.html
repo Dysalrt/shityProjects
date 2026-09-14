@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain Booster Games</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Brain Booster</h1>
+    </header>
+
+    <!-- Main Navigation Menu -->
+    <nav id="menu">
+        <button class="menu-btn" onclick="showScreen('memory-setup-screen')">1. Memory Matrix</button>
+        <button class="menu-btn" onclick="showScreen('math-game-screen')">2. Speed Math</button>
+    </nav>
+
+    <!-- GAME 1: MEMORY MATRIX -->
+    <!-- Setup Screen -->
+    <div id="memory-setup-screen" class="screen hidden">
+        <h2>Memory Matrix</h2>
+        <div class="input-group">
+            <label for="grid-size">Grid Size (X):</label>
+            <input type="number" id="grid-size" value="3" min="2" max="15">
+        </div>
+        <div class="input-group">
+            <label for="wait-time">Wait Time (seconds):</label>
+            <input type="number" id="wait-time" value="3" min="1" max="60">
+        </div>
+        <button class="btn" onclick="startMemoryGame()">Start Game</button>
+        <button class="btn secondary" onclick="showMenu()">Back to Menu</button>
+    </div>
+
+    <!-- Play Screen -->
+    <div id="memory-game-screen" class="screen hidden">
+        <h2 id="memory-status">Memorize the pattern!</h2>
+        <div id="timer-display" class="timer hidden">Wait... <span id="countdown">0</span>s</div>
+        <div id="memory-grid" class="grid"></div>
+        <button id="memory-action-btn" class="btn" onclick="handleMemoryAction()">Done</button>
+        <button class="btn secondary" onclick="showMenu()">Quit</button>
+    </div>
+
+    <!-- GAME 2: SPEED MATH -->
+    <div id="math-game-screen" class="screen hidden">
+        <h2>Speed Math</h2>
+        <div class="math-stats">
+            <div>Time: <span id="math-timer">0.0</span>s</div>
+            <div>Score: <span id="math-score">0</span></div>
+        </div>
+        <div id="math-equation" class="equation">? + ?</div>
+        <div id="math-input" class="math-display-input">_</div>
+        
+        <!-- Virtual Numpad -->
+        <div class="numpad">
+            <button onclick="appendMathInput('1')">1</button>
+            <button onclick="appendMathInput('2')">2</button>
+            <button onclick="appendMathInput('3')">3</button>
+            <button onclick="appendMathInput('4')">4</button>
+            <button onclick="appendMathInput('5')">5</button>
+            <button onclick="appendMathInput('6')">6</button>
+            <button onclick="appendMathInput('7')">7</button>
+            <button onclick="appendMathInput('8')">8</button>
+            <button onclick="appendMathInput('9')">9</button>
+            <button onclick="clearMathInput()">⌫</button>
+            <button onclick="appendMathInput('0')">0</button>
+            <button class="submit-btn" onclick="submitMathAnswer()">✓</button>
+        </div>
+        
+        <button id="math-start-btn" class="btn" onclick="toggleMathGame()">Start Game</button>
+        <button class="btn secondary" onclick="showMenu()">Back to Menu</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
