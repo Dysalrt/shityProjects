@@ -93,6 +93,7 @@
 
     <div id="reaction-game-screen" class="screen hidden">
         <div class="math-stats">
+            <div>Time: <span id="react-stopwatch">0.0</span>s</div>
             <div>Score: <span id="react-score">0</span></div>
             <div>Penalty: <span id="react-penalty">0</span></div>
         </div>
@@ -125,6 +126,10 @@
     <div id="tracker-game-screen" class="screen hidden">
         <h2 id="tracker-status">Memorize starting position!</h2>
         <div id="tracker-grid" class="grid grid-10"></div>
+        
+        <!-- Separate display box for directional arrows -->
+        <div id="arrow-display-box" class="arrow-box"></div>
+
         <button id="tracker-btn" class="btn" onclick="handleTrackerAction()">Ready</button>
         <button class="btn secondary" onclick="stopTrackerGame(); showMenu();">Quit</button>
     </div>
