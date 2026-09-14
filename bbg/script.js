@@ -404,7 +404,7 @@ function startTrackerGame() {
 
     const arrowBox = document.getElementById('arrow-display-box');
     arrowBox.innerText = '';
-    arrowBox.classList.remove('fade-out');
+    arrowBox.style.opacity = '1';
 
     // Set Random Initial Red Square
     trackerPos.r = Math.floor(Math.random() * 10);
@@ -463,28 +463,32 @@ async function startArrowSequence() {
         trackerCurrentPos.r += move.r;
         trackerCurrentPos.c += move.c;
 
-        // Reset state before rendering arrow
+        // Показываем стрелку мгновенно
         arrowBox.style.transition = 'none';
-        arrowBox.classList.remove('fade-out');
+        arrowBox.style.opacity = '1';
         arrowBox.innerText = move.arrow;
         arrowBox.style.color = (trackerMode === 'hardcore' && Math.random() > 0.4) 
             ? DECOY_COLORS[Math.floor(Math.random() * DECOY_COLORS.length)] 
             : '#e74c3c';
 
-        // Brief delay to ensure transition applies cleanly
-        await new Promise(res => setTimeout(res, 50));
+        // Принудительно вызываем reflow, чтобы браузер отрендерил появление
+        void arrowBox.offsetWidth;
 
-        // Start fading out according to configured speed
-        let fadeDuration = trackerSpeed * 0.8; 
-        arrowBox.style.transition = `opacity ${fadeDuration}s ease-in-out`;
-        arrowBox.classList.add('fade-out');
+        // Оставляем видимой 30% времени от шага
+        await new Promise(res => setTimeout(res, trackerSpeed * 300));
 
-        // Wait for configured step duration before displaying next arrow
-        await new Promise(res => setTimeout(res, trackerSpeed * 1000));
+        // Включаем плавный затухающий переход
+        let fadeDuration = trackerSpeed * 0.6;
+        arrowBox.style.transition = `opacity ${fadeDuration}s linear`;
+        arrowBox.style.opacity = '0';
+
+        // Ждем остаток времени шага
+        await new Promise(res => setTimeout(res, trackerSpeed * 700));
     }
 
     arrowBox.innerText = '';
-    arrowBox.classList.remove('fade-out');
+    arrowBox.style.opacity = '1';
+    arrowBox.style.transition = 'none';
     enableGuessingPhase();
 }
 
@@ -517,4 +521,4 @@ function enableGuessingPhase() {
             btn.innerText = 'Play Again';
         };
     });
-            }
+}
