@@ -24,20 +24,21 @@ header h1 {
 #menu {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
     width: 100%;
     max-width: 320px;
 }
 
 .menu-btn {
     padding: 15px;
-    font-size: 18px;
+    font-size: 16px;
     background-color: #1e1e1e;
     color: white;
     border: 2px solid #333;
     border-radius: 8px;
     cursor: pointer;
     transition: 0.2s;
+    text-align: left;
 }
 
 .menu-btn:hover {
@@ -67,11 +68,13 @@ header h1 {
     margin-bottom: 5px;
 }
 
-.input-group input {
+.input-group input, .input-group select {
     padding: 10px;
     font-size: 16px;
     border-radius: 5px;
     border: none;
+    background: #222;
+    color: white;
 }
 
 .btn {
@@ -90,28 +93,61 @@ header h1 {
     background-color: #555;
 }
 
-/* Grid Styles for Memory Game */
+/* Grids */
 .grid {
     display: grid;
-    gap: 5px;
-    margin: 20px 0;
+    gap: 4px;
+    margin: 15px 0;
     width: 100%;
     max-width: 350px;
+}
+
+.grid-10 {
+    grid-template-columns: repeat(10, 1fr);
 }
 
 .cell {
     aspect-ratio: 1;
     border-radius: 4px;
     cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    background-color: #222;
+    transition: background-color 0.1s, opacity 0.5s ease;
 }
 
-.timer {
-    font-size: 20px;
-    color: #ff9800;
-    margin: 10px 0;
+/* Feedback for Game 1 */
+.cell.correct::after {
+    content: '✓';
+    color: #ffffff;
+    font-size: 1.2rem;
+    text-shadow: 0 0 4px rgba(0,0,0,0.8);
 }
 
-/* Speed Math Styles */
+.cell.wrong {
+    border: 2px solid #ff3333;
+}
+
+.cell.wrong::before {
+    content: '✕';
+    color: #ffffff;
+    font-size: 0.9rem;
+}
+
+.target-color-hint {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1px solid #ffffff;
+}
+
+/* Math Styles */
 .math-stats {
     display: flex;
     justify-content: space-between;
@@ -157,48 +193,13 @@ header h1 {
 .numpad button.submit-btn {
     background-color: #4CAF50;
 }
-/* Feedback styles for Memory Game */
-.cell {
-    aspect-ratio: 1;
-    border-radius: 6px;
-    cursor: pointer;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+
+/* Observer Game Arrows */
+.arrow-cell {
+    font-size: 1.1rem;
     font-weight: bold;
-    box-sizing: border-box;
-    transition: transform 0.15s ease;
 }
 
-/* Correct answer overlay */
-.cell.correct::after {
-    content: '✓';
-    color: #ffffff;
-    font-size: 1.2rem;
-    text-shadow: 0 0 4px rgba(0,0,0,0.8);
-}
-
-/* Wrong answer overlay with target color hint */
-.cell.wrong {
-    border: 3px solid #ff3333;
-}
-
-.cell.wrong::before {
-    content: '✕';
-    color: #ffffff;
-    font-size: 0.9rem;
-    text-shadow: 0 0 3px rgba(0,0,0,0.8);
-}
-
-/* Small circle indicator showing what color SHOULD have been there */
-.target-color-hint {
-    position: absolute;
-    bottom: 3px;
-    right: 3px;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    border: 1px solid #ffffff;
-    box-shadow: 0 0 3px rgba(0,0,0,0.6);
+.fade-out {
+    opacity: 0 !important;
 }
